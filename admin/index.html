@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Painel de Artigos</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230d1b2a'/><text y='.9em' font-size='65' font-family='Georgia' fill='white'>A</text></svg>" />
+</head>
+<body class="admin-body">
+
+  <!-- LOGIN -->
+  <div class="login-screen" id="login-screen">
+    <div class="login-box">
+      <div class="login-logo">Painel<span>Admin</span></div>
+      <div class="login-sub">Área restrita · Economista Quantitativo</div>
+      <div class="field">
+        <label>Senha</label>
+        <input type="password" id="login-input" placeholder="Digite sua senha" autocomplete="current-password" />
+        <div class="login-error" id="login-error"></div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="doLogin()">Entrar</button>
+    </div>
+  </div>
+
+  <!-- ADMIN NAV -->
+  <nav class="admin-nav">
+    <div class="admin-nav-inner">
+      <div class="admin-logo">Painel<span>Admin</span></div>
+      <div class="admin-nav-links">
+        <a href="#" onclick="showView('lista')">Artigos</a>
+        <a href="#" onclick="showView('novo')">Novo artigo</a>
+        <a href="../index.html" target="_blank">Ver site →</a>
+        <span class="admin-badge">Admin</span>
+        <a href="#" onclick="doLogout()" style="color:rgba(255,255,255,0.4)">Sair</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="admin-main">
+
+    <!-- STATS -->
+    <div class="admin-stats" id="admin-stats"></div>
+
+    <!-- VIEW: LISTA -->
+    <div id="view-lista">
+      <div class="admin-header">
+        <div class="admin-title">Artigos publicados</div>
+        <button class="btn btn-primary" onclick="showView('novo')">+ Novo artigo</button>
+      </div>
+      <div class="admin-editor-box">
+        <div class="admin-box-header">Todos os artigos</div>
+        <div class="admin-box-body" style="padding:0">
+          <div id="admin-articles-list" style="padding:0 1.25rem"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: EDITOR -->
+    <div id="view-editor" style="display:none">
+      <div class="admin-header">
+        <div class="admin-title" id="editor-title">Novo artigo</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="showView('lista')">Cancelar</button>
+          <button class="btn" onclick="saveRascunho()">Salvar rascunho</button>
+          <button class="btn btn-primary" onclick="publicar()">Publicar</button>
+        </div>
+      </div>
+
+      <div class="admin-layout">
+
+        <!-- Editor principal -->
+        <div>
+          <div class="admin-editor-box">
+            <!-- Título -->
+            <div style="padding:1.25rem 1.5rem;border-bottom:0.5px solid var(--border)">
+              <input type="text" id="f-title"
+                placeholder="Título do artigo"
+                style="width:100%;border:none;outline:none;font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--navy);background:transparent"
+              />
+            </div>
+            <!-- Resumo -->
+            <div style="padding:0.75rem 1.5rem;border-bottom:0.5px solid var(--border);background:var(--gray-bg)">
+              <input type="text" id="f-desc"
+                placeholder="Resumo / descrição breve (aparece nos cards)"
+                style="width:100%;border:none;outline:none;font-size:13px;color:var(--text-2);background:transparent;font-family:var(--sans)"
+              />
+            </div>
+            <!-- Tabs editor/preview -->
+            <div class="editor-tabs">
+              <button class="editor-tab active" id="tab-escrever" onclick="setTab('escrever')">Escrever</button>
+              <button class="editor-tab" id="tab-preview" onclick="setTab('preview')">Pré-visualizar</button>
+            </div>
+            <!-- Toolbar -->
+            <div class="editor-toolbar" id="editor-toolbar">
+              <button class="tb-btn" onclick="fmt('bold')" title="Negrito"><b>B</b></button>
+              <button class="tb-btn" onclick="fmt('italic')" title="Itálico"><i>I</i></button>
+              <div class="tb-sep"></div>
+              <button class="tb-btn" onclick="insertTag('h2')" title="Título H2">H2</button>
+              <button class="tb-btn" onclick="insertTag('h3')" title="Título H3">H3</button>
+              <div class="tb-sep"></div>
+              <button class="tb-btn" onclick="fmt('insertUnorderedList')" title="Lista">• Lista</button>
+              <button class="tb-btn" onclick="fmt('insertOrderedList')" title="Lista numerada">1. Lista</button>
+              <div class="tb-sep"></div>
+              <button class="tb-btn" onclick="insertBlockquote()" title="Citação">❝ Citação</button>
+              <button class="tb-btn" onclick="insertCode()" title="Código">{'</>'}Código</button>
+              <button class="tb-btn" onclick="insertHr()" title="Separador">— HR</button>
+              <div class="tb-sep"></div>
+              <button class="tb-btn" onclick="insertLink()" title="Link">🔗 Link</button>
+            </div>
+            <!-- Editor contenteditable -->
+            <div class="editor-area" id="editor-area">
+              <div id="editor" contenteditable="true" spellcheck="true"
+                data-placeholder="Comece a escrever seu artigo aqui..."></div>
+              <div class="preview-area artigo-body" id="preview-area"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar metadados -->
+        <div>
+          <div class="admin-sidebar-box">
+            <div class="admin-box-header">Publicação</div>
+            <div class="admin-box-body">
+              <div class="field">
+                <label>Status</label>
+                <select id="f-status">
+                  <option value="publicado">Publicado</option>
+                  <option value="rascunho">Rascunho</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Data</label>
+                <input type="text" id="f-date" placeholder="Ex: Jun 2025" />
+              </div>
+              <div class="field">
+                <label>Tempo de leitura</label>
+                <input type="text" id="f-time" placeholder="Ex: 12 min" />
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-sidebar-box">
+            <div class="admin-box-header">Categorização</div>
+            <div class="admin-box-body">
+              <div class="field">
+                <label>Categoria (exibida)</label>
+                <input type="text" id="f-cat" placeholder="Ex: Macroeconomia" />
+              </div>
+              <div class="field">
+                <label>Filtro</label>
+                <select id="f-filtro">
+                  <option value="macroeconomia">Macroeconomia</option>
+                  <option value="mercado">Mercado Financeiro</option>
+                  <option value="python">Python</option>
+                  <option value="econometria">Econometria</option>
+                  <option value="tesouro">Tesouro Direto</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Tags (separe por vírgula)</label>
+                <input type="text" id="f-tags" placeholder="Ex: SELIC, IPCA, Econometria" />
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-sidebar-box">
+            <div class="admin-box-header">
+              Pré-visualização do card
+              <span style="font-size:10px;color:var(--text-3);font-weight:400;text-transform:none;letter-spacing:0">Como aparece na listagem</span>
+            </div>
+            <div class="admin-box-body" style="padding:0">
+              <div id="card-preview" style="padding:1rem;font-size:13px">
+                <div class="art-cat" id="prev-cat" style="font-size:10px"></div>
+                <div class="art-title" id="prev-title" style="font-size:13px;margin:4px 0"></div>
+                <div class="art-desc" id="prev-desc" style="font-size:12px"></div>
+                <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap" id="prev-tags"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-sidebar-box">
+            <div class="admin-box-header">Atalhos</div>
+            <div class="admin-box-body" style="font-size:12px;color:var(--text-3);line-height:2">
+              <div><kbd style="background:var(--gray-bg);padding:1px 5px;border:0.5px solid var(--border)">Ctrl+B</kbd> Negrito</div>
+              <div><kbd style="background:var(--gray-bg);padding:1px 5px;border:0.5px solid var(--border)">Ctrl+I</kbd> Itálico</div>
+              <div><kbd style="background:var(--gray-bg);padding:1px 5px;border:0.5px solid var(--border)">Ctrl+S</kbd> Salvar</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /admin-main -->
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    /* ============================================
+       SENHA — altere aqui a sua senha
+       ============================================ */
+    const ADMIN_PASSWORD = 'economia2025';
+    const SESSION_KEY    = 'admin_auth';
+    const STORAGE_KEY    = 'portfolio_artigos';
+
+    /* ---- LOGIN ---- */
+    function doLogin() {
+      const val = document.getElementById('login-input').value;
+      if (val === ADMIN_PASSWORD) {
+        sessionStorage.setItem(SESSION_KEY, '1');
+        document.getElementById('login-screen').style.display = 'none';
+        initAdmin();
+      } else {
+        document.getElementById('login-error').textContent = 'Senha incorreta.';
+        document.getElementById('login-input').value = '';
+        document.getElementById('login-input').focus();
+      }
+    }
+
+    function doLogout() {
+      sessionStorage.removeItem(SESSION_KEY);
+      location.reload();
+    }
+
+    document.getElementById('login-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+
+    /* ---- STORAGE ---- */
+    function getArtigos() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch(e) { return []; }
+    }
+
+    function saveArtigos(arr) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+    }
+
+    /* ---- TOAST ---- */
+    function toast(msg, dur = 2500) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), dur);
+    }
+
+    /* ---- VIEWS ---- */
+    let editandoId = null;
+
+    function showView(v) {
+      document.getElementById('view-lista').style.display   = v === 'lista'  ? 'block' : 'none';
+      document.getElementById('view-editor').style.display  = v === 'novo' || v === 'editor' ? 'block' : 'none';
+      if (v === 'lista')  { editandoId = null; renderAdminList(); updateStats(); }
+      if (v === 'novo')   { editandoId = null; limparForm(); document.getElementById('editor-title').textContent = 'Novo artigo'; }
+    }
+
+    /* ---- STATS ---- */
+    function updateStats() {
+      const arts = getArtigos();
+      const pub  = arts.filter(a => a.status !== 'rascunho').length;
+      const ras  = arts.filter(a => a.status === 'rascunho').length;
+      document.getElementById('admin-stats').innerHTML = `
+        <div class="admin-stat"><div class="admin-stat-num">${arts.length}</div><div class="admin-stat-label">Total de artigos</div></div>
+        <div class="admin-stat"><div class="admin-stat-num">${pub}</div><div class="admin-stat-label">Publicados</div></div>
+        <div class="admin-stat"><div class="admin-stat-num">${ras}</div><div class="admin-stat-label">Rascunhos</div></div>
+      `;
+    }
+
+    /* ---- LISTA ---- */
+    function renderAdminList() {
+      const arts = getArtigos();
+      const el   = document.getElementById('admin-articles-list');
+      if (arts.length === 0) {
+        el.innerHTML = `<p style="padding:1.5rem 0;color:var(--text-3);font-size:13px">Nenhum artigo ainda. <a href="#" onclick="showView('novo')" style="color:var(--accent)">Criar o primeiro →</a></p>`;
+        return;
+      }
+      el.innerHTML = arts.map(a => `
+        <div class="admin-article-item">
+          <div style="flex:1;min-width:0">
+            <div class="admin-art-title">${a.title}</div>
+            <div class="admin-art-meta">${a.cat} · ${a.date} · ${a.time} de leitura
+              ${a.status === 'rascunho' ? '<span style="color:var(--accent);margin-left:6px">● Rascunho</span>' : ''}
+            </div>
+          </div>
+          <div class="admin-art-actions">
+            <button class="admin-art-btn" onclick="editarArtigo('${a.id}')">Editar</button>
+            <button class="admin-art-btn danger" onclick="deletarArtigo('${a.id}')">Excluir</button>
+          </div>
+        </div>`).join('');
+    }
+
+    /* ---- EDITOR ---- */
+    function limparForm() {
+      document.getElementById('f-title').value   = '';
+      document.getElementById('f-desc').value    = '';
+      document.getElementById('f-cat').value     = '';
+      document.getElementById('f-filtro').value  = 'macroeconomia';
+      document.getElementById('f-tags').value    = '';
+      document.getElementById('f-date').value    = hojeFormatado();
+      document.getElementById('f-time').value    = '';
+      document.getElementById('f-status').value  = 'publicado';
+      document.getElementById('editor').innerHTML = '';
+      setTab('escrever');
+      updatePreview();
+    }
+
+    function hojeFormatado() {
+      const d = new Date();
+      const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      return meses[d.getMonth()] + ' ' + d.getFullYear();
+    }
+
+    function editarArtigo(id) {
+      const arts = getArtigos();
+      const a    = arts.find(x => x.id === id);
+      if (!a) return;
+      editandoId = id;
+      document.getElementById('f-title').value  = a.title;
+      document.getElementById('f-desc').value   = a.desc;
+      document.getElementById('f-cat').value    = a.cat;
+      document.getElementById('f-filtro').value = a.filtro;
+      document.getElementById('f-tags').value   = (a.tags||[]).join(', ');
+      document.getElementById('f-date').value   = a.date;
+      document.getElementById('f-time').value   = a.time;
+      document.getElementById('f-status').value = a.status || 'publicado';
+      document.getElementById('editor').innerHTML = a.conteudo || '';
+      document.getElementById('editor-title').textContent = 'Editar artigo';
+      showView('editor');
+      updatePreview();
+    }
+
+    function deletarArtigo(id) {
+      if (!confirm('Excluir este artigo? Esta ação não pode ser desfeita.')) return;
+      let arts = getArtigos();
+      arts = arts.filter(a => a.id !== id);
+      saveArtigos(arts);
+      renderAdminList();
+      updateStats();
+      toast('Artigo excluído.');
+    }
+
+    function coletarForm(status) {
+      const title = document.getElementById('f-title').value.trim();
+      if (!title) { alert('O título é obrigatório.'); return null; }
+      const tagsRaw = document.getElementById('f-tags').value;
+      const tags    = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
+      const conteudo = document.getElementById('editor').innerHTML;
+      return {
+        id:       editandoId || ('art-' + Date.now()),
+        title,
+        desc:     document.getElementById('f-desc').value.trim(),
+        cat:      document.getElementById('f-cat').value.trim() || 'Geral',
+        filtro:   document.getElementById('f-filtro').value,
+        tags,
+        date:     document.getElementById('f-date').value.trim() || hojeFormatado(),
+        time:     document.getElementById('f-time').value.trim() || '5 min',
+        status:   status || document.getElementById('f-status').value,
+        conteudo,
+      };
+    }
+
+    function publicar() {
+      const artigo = coletarForm('publicado');
+      if (!artigo) return;
+      salvarArtigo(artigo);
+      toast('✓ Artigo publicado!');
+    }
+
+    function saveRascunho() {
+      const artigo = coletarForm('rascunho');
+      if (!artigo) return;
+      salvarArtigo(artigo);
+      toast('Rascunho salvo.');
+    }
+
+    function salvarArtigo(artigo) {
+      let arts = getArtigos();
+      const idx = arts.findIndex(a => a.id === artigo.id);
+      if (idx >= 0) arts[idx] = artigo;
+      else          arts.unshift(artigo);
+      saveArtigos(arts);
+      editandoId = artigo.id;
+    }
+
+    /* ---- TABS ---- */
+    function setTab(tab) {
+      const area = document.getElementById('editor-area');
+      const tb   = document.getElementById('editor-toolbar');
+      const te   = document.getElementById('tab-escrever');
+      const tp   = document.getElementById('tab-preview');
+      if (tab === 'preview') {
+        document.getElementById('preview-area').innerHTML =
+          document.getElementById('editor').innerHTML || '<p style="color:var(--text-3);font-style:italic">Nada para pré-visualizar.</p>';
+        area.classList.add('preview-mode');
+        tb.style.display = 'none';
+        te.classList.remove('active');
+        tp.classList.add('active');
+      } else {
+        area.classList.remove('preview-mode');
+        tb.style.display = 'flex';
+        te.classList.add('active');
+        tp.classList.remove('active');
+      }
+    }
+
+    /* ---- TOOLBAR ---- */
+    function fmt(cmd) {
+      document.getElementById('editor').focus();
+      document.execCommand(cmd, false, null);
+    }
+
+    function insertTag(tag) {
+      document.getElementById('editor').focus();
+      const sel   = window.getSelection();
+      const text  = sel && sel.toString() ? sel.toString() : 'Título';
+      document.execCommand('insertHTML', false, `<${tag}>${text}</${tag}><p><br></p>`);
+    }
+
+    function insertBlockquote() {
+      document.getElementById('editor').focus();
+      document.execCommand('insertHTML', false, '<blockquote>Citação aqui...</blockquote><p><br></p>');
+    }
+
+    function insertCode() {
+      document.getElementById('editor').focus();
+      const sel  = window.getSelection();
+      const text = sel && sel.toString() ? sel.toString() : 'seu_codigo_aqui()';
+      const isMultiline = text.includes('\n') || text.length > 60;
+      if (isMultiline) {
+        document.execCommand('insertHTML', false, `<pre><code>${text}</code></pre><p><br></p>`);
+      } else {
+        document.execCommand('insertHTML', false, `<code>${text}</code>`);
+      }
+    }
+
+    function insertHr() {
+      document.getElementById('editor').focus();
+      document.execCommand('insertHTML', false, '<hr><p><br></p>');
+    }
+
+    function insertLink() {
+      const url = prompt('URL do link:');
+      if (!url) return;
+      document.getElementById('editor').focus();
+      const sel  = window.getSelection();
+      const text = sel && sel.toString() ? sel.toString() : url;
+      document.execCommand('insertHTML', false, `<a href="${url}" target="_blank" rel="noopener">${text}</a>`);
+    }
+
+    /* ---- PREVIEW CARD ---- */
+    function updatePreview() {
+      document.getElementById('prev-cat').textContent   = document.getElementById('f-cat').value   || 'Categoria';
+      document.getElementById('prev-title').textContent = document.getElementById('f-title').value || 'Título do artigo';
+      document.getElementById('prev-desc').textContent  = document.getElementById('f-desc').value  || 'Descrição breve...';
+      const tags = document.getElementById('f-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+      document.getElementById('prev-tags').innerHTML = tags.map(t=>`<span class="art-tag">${t}</span>`).join('');
+    }
+
+    /* ---- ATALHOS ---- */
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (document.getElementById('view-editor').style.display !== 'none') {
+          saveRascunho();
+        }
+      }
+    });
+
+    /* ---- PLACEHOLDER no editor ---- */
+    const editorEl = document.getElementById('editor');
+    editorEl.addEventListener('input', () => {
+      updatePreview();
+      editorEl.classList.toggle('empty', editorEl.innerHTML === '' || editorEl.innerHTML === '<br>');
+    });
+    editorEl.classList.add('empty');
+
+    /* ---- LIVE PREVIEW ---- */
+    ['f-cat','f-title','f-desc','f-tags'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updatePreview);
+    });
+
+    /* ---- INIT ---- */
+    function initAdmin() {
+      updateStats();
+      renderAdminList();
+      showView('lista');
+    }
+
+    /* ---- VERIFICAR SESSÃO ---- */
+    if (sessionStorage.getItem(SESSION_KEY) === '1') {
+      document.getElementById('login-screen').style.display = 'none';
+      initAdmin();
+    } else {
+      setTimeout(() => document.getElementById('login-input').focus(), 100);
+    }
+  </script>
+
+  <style>
+    /* Placeholder visual no editor */
+    #editor.empty:before {
+      content: attr(data-placeholder);
+      color: var(--gray-light);
+      pointer-events: none;
+      position: absolute;
+      font-style: italic;
+    }
+    #editor { position: relative; }
+  </style>
+
+</body>
+</html>
