@@ -106,50 +106,7 @@ const CONFIG = {
     },
   ],
 
-  projetos: [
-    {
-      icon: "chart-line", tag: "Macroeconomia · Python",
-      title: "Dashboard Macroeconômico Brasileiro",
-      desc: "Painel interativo com indicadores do Bacen, IBGE e IPEA atualizados automaticamente via API.",
-      techs: ["Python","Streamlit","Pandas","Plotly","API Bacen"],
-      github: "https://github.com/ErikCassiocs", demo: null
-    },
-    {
-      icon: "currency-dollar", tag: "Tesouro Direto · Simulação",
-      title: "Simulador de Tesouro Direto",
-      desc: "Ferramenta para comparar rentabilidade de títulos públicos com inflação, imposto de renda e cenários de resgate antecipado.",
-      techs: ["Python","Streamlit","NumPy","Matplotlib"],
-      github: "https://github.com/ErikCassiocs", demo: null
-    },
-    {
-      icon: "brain", tag: "Econometria · Machine Learning",
-      title: "Modelo de Previsão Cambial (BRL/USD)",
-      desc: "Modelo híbrido VAR + LSTM para previsão de curto prazo do câmbio com variáveis macroeconômicas.",
-      techs: ["Python","Statsmodels","TensorFlow","Keras"],
-      github: "https://github.com/ErikCassiocs", demo: null
-    },
-    {
-      icon: "receipt", tag: "Revenue Management",
-      title: "Modelo de Precificação Dinâmica",
-      desc: "Algoritmo de otimização de preços com base em elasticidade, sazonalidade e análise de concorrência.",
-      techs: ["Python","SciPy","Power BI","SQL"],
-      github: "https://github.com/ErikCassiocs", demo: null
-    },
-    {
-      icon: "database", tag: "Automação · ETL",
-      title: "Pipeline de Dados Econômicos",
-      desc: "ETL automatizado que coleta, trata e armazena dados do Bacen, IBGE e IPEA para análise periódica.",
-      techs: ["Python","SQL","SQLite","Schedule"],
-      github: "https://github.com/ErikCassiocs", demo: null
-    },
-    {
-      icon: "trending-up", tag: "Inflação · Econometria",
-      title: "Análise de Componentes do IPCA",
-      desc: "Decomposição e previsão dos subcomponentes do IPCA com modelos de séries temporais.",
-      techs: ["Python","R","ARIMA","Prophet","Statsmodels"],
-      github: "https://github.com/ErikCassiocs", demo: null
-    },
-  ]
+  projetos: [ ]
 };
 
 /* ============================================
