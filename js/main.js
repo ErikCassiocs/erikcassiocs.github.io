@@ -71,7 +71,40 @@ const CONFIG = {
     "Parcerias de pesquisa"
   ],
 
-  artigosExemplo: [  ],
+  artigosExemplo: [
+    {
+      id: "ex-1", cat: "Macroeconomia",
+      title: "Política Monetária e Inflação: Uma Análise dos Ciclos de Juros no Brasil",
+      desc: "Modelagem econométrica das relações entre Selic, IPCA e expectativas de mercado entre 2015–2024.",
+      date: "Jun 2025", time: "12 min",
+      tags: ["SELIC","IPCA","Econometria"], filtro: "macroeconomia",
+      conteudo: "<p>Este é um artigo de exemplo. Publique seu primeiro artigo pelo painel administrativo.</p>"
+    },
+    {
+      id: "ex-2", cat: "Mercado Financeiro",
+      title: "Tesouro IPCA+ vs Tesouro Selic: Um Modelo de Decisão por Horizonte de Tempo",
+      desc: "Comparação quantitativa entre títulos públicos considerando marcação a mercado, duration e risco de reinvestimento.",
+      date: "Mai 2025", time: "8 min",
+      tags: ["Tesouro Direto","Renda Fixa","Risco"], filtro: "tesouro",
+      conteudo: "<p>Este é um artigo de exemplo. Publique seu primeiro artigo pelo painel administrativo.</p>"
+    },
+    {
+      id: "ex-3", cat: "Python",
+      title: "Pipeline Automatizado de Indicadores Macroeconômicos com Python e API do Bacen",
+      desc: "Coleta, tratamento e visualização automática de dados do SGS/Bacen com pandas, requests e matplotlib.",
+      date: "Abr 2025", time: "15 min",
+      tags: ["Python","Pandas","Bacen","ETL"], filtro: "python",
+      conteudo: "<p>Este é um artigo de exemplo. Publique seu primeiro artigo pelo painel administrativo.</p>"
+    },
+    {
+      id: "ex-4", cat: "Econometria",
+      title: "Modelos VAR para Previsão Cambial: Evidências para o BRL/USD",
+      desc: "Estimação de um modelo VAR com variáveis macroeconômicas externas e internas para previsão do câmbio.",
+      date: "Mar 2025", time: "20 min",
+      tags: ["VAR","Câmbio","Previsão"], filtro: "econometria",
+      conteudo: "<p>Este é um artigo de exemplo. Publique seu primeiro artigo pelo painel administrativo.</p>"
+    },
+  ],
 
   projetos: [
     {
@@ -122,7 +155,19 @@ const CONFIG = {
 /* ============================================
    STORAGE
    ============================================ */
-const STORAGE_KEY = 'portfolio_artigos';
+const STORAGE_KEY  = 'portfolio_artigos';
+const STORAGE_PROJ = 'portfolio_projetos';
+
+function getProjetos() {
+  try {
+    const raw = localStorage.getItem(STORAGE_PROJ);
+    if (raw) {
+      const saved = JSON.parse(raw);
+      if (Array.isArray(saved) && saved.length > 0) return saved;
+    }
+  } catch(e) {}
+  return CONFIG.projetos;
+}
 
 function getArtigos() {
   try {
@@ -185,7 +230,7 @@ function renderHome() {
     </div>`).join('');
 
   // featured projects (first 3)
-  document.getElementById('home-projects').innerHTML = CONFIG.projetos.slice(0, 3).map((p, i) => `
+  document.getElementById('home-projects').innerHTML = getProjetos().slice(0, 3).map((p, i) => `
     <div class="project-row">
       <div class="proj-index">0${i+1}</div>
       <div>
@@ -269,7 +314,7 @@ function abrirArtigo(id) {
    RENDER — PROJETOS
    ============================================ */
 function renderProjetos() {
-  document.getElementById('projects-grid').innerHTML = CONFIG.projetos.map((p, i) => `
+  document.getElementById('projects-grid').innerHTML = getProjetos().map((p, i) => `
     <div class="project-row">
       <div class="proj-index">0${i+1}</div>
       <div>
