@@ -17,12 +17,6 @@ const CONFIG = {
     email:     "email@email.com",
   },
 
-  stats: [
-    { num: "12+", label: "Estudos publicados" },
-    { num: "8",   label: "Projetos técnicos"  },
-    { num: "5+",  label: "Anos de experiência"},
-  ],
-
   bio: [
     "Sou economista e atuo de forma independente desenvolvendo análises quantitativas, modelos preditivos e projetos de ciência de dados aplicados à economia e ao mercado financeiro.",
     "Minha principal área de interesse é entender fenômenos econômicos por meio de dados. Para isso, utilizo estatística, econometria e programação em Python para construir modelos, analisar indicadores e transformar informações complexas em análises objetivas.",
@@ -71,10 +65,23 @@ const CONFIG = {
     "Parcerias de pesquisa"
   ],
 
-  artigosExemplo: [  ],
-
-  projetos: [ ]
+  artigosExemplo: [],
+  projetos: []
 };
+
+/* ============================================
+   ANOS DE EXPERIÊNCIA
+   Começa em 17 em jun/2025.
+   Base: junho de 2008. Soma +1 a cada junho.
+   ============================================ */
+function calcAnosExp() {
+  const hoje = new Date();
+  const ano  = hoje.getFullYear();
+  const mes  = hoje.getMonth(); // 0=jan … 5=jun
+  // Em jun/2025 completa 17 anos → base = 2008
+  const anos = ano - 2008;
+  return mes >= 5 ? anos : anos - 1;
+}
 
 /* ============================================
    STORAGE
@@ -133,14 +140,21 @@ const ICONS = {
    RENDER — HOME
    ============================================ */
 function renderHome() {
-  // stats
-  document.getElementById('hero-stats').innerHTML = CONFIG.stats.map(s => `
-    <div class="hero-stat">
-      <div class="hero-stat-num">${s.num}</div>
-      <div class="hero-stat-label">${s.label}</div>
-    </div>`).join('');
+  // stats dinâmicos
+  const totalArtigos = getArtigos().filter(a => a.status !== 'rascunho').length;
+  const anosExp      = calcAnosExp();
 
-  // latest articles
+  document.getElementById('hero-stats').innerHTML = `
+    <div class="hero-stat">
+      <div class="hero-stat-num">${totalArtigos}</div>
+      <div class="hero-stat-label">Estudos publicados</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">${anosExp}</div>
+      <div class="hero-stat-label">Anos de experiência</div>
+    </div>`;
+
+  // últimos artigos
   const artigos = getArtigos();
   document.getElementById('home-articles').innerHTML = artigos.slice(0, 5).map((a, i) => `
     <div class="article-row" onclick="abrirArtigo('${a.id}')">
@@ -153,7 +167,7 @@ function renderHome() {
       <div class="art-meta">${a.date}<br>${a.time} leit.</div>
     </div>`).join('');
 
-  // featured projects (first 3)
+  // projetos em destaque
   document.getElementById('home-projects').innerHTML = getProjetos().slice(0, 3).map((p, i) => `
     <div class="project-row">
       <div class="proj-index">0${i+1}</div>
@@ -161,7 +175,7 @@ function renderHome() {
         <div class="proj-tag">${p.tag}</div>
         <div class="proj-title">${p.title}</div>
         <div class="proj-desc">${p.desc}</div>
-        <div class="proj-techs">${p.techs.map(t=>`<span class="proj-tech">${t}</span>`).join('')}</div>
+        <div class="proj-techs">${(p.techs||[]).map(t=>`<span class="proj-tech">${t}</span>`).join('')}</div>
       </div>
       <div class="proj-links">
         ${p.github ? `<a href="${p.github}" class="proj-link" target="_blank" rel="noopener">${ICONS.external} GitHub</a>` : ''}
@@ -224,7 +238,6 @@ function abrirArtigo(id) {
   const artigos = getArtigos();
   const a = artigos.find(x => x.id === id);
   if (!a) return;
-
   document.getElementById('artigo-cat').textContent   = a.cat;
   document.getElementById('artigo-title').textContent = a.title;
   document.getElementById('artigo-date').textContent  = a.date;
@@ -238,20 +251,23 @@ function abrirArtigo(id) {
    RENDER — PROJETOS
    ============================================ */
 function renderProjetos() {
-  document.getElementById('projects-grid').innerHTML = getProjetos().map((p, i) => `
-    <div class="project-row">
-      <div class="proj-index">0${i+1}</div>
-      <div>
-        <div class="proj-tag">${p.tag}</div>
-        <div class="proj-title">${p.title}</div>
-        <div class="proj-desc">${p.desc}</div>
-        <div class="proj-techs">${p.techs.map(t=>`<span class="proj-tech">${t}</span>`).join('')}</div>
-      </div>
-      <div class="proj-links">
-        ${p.github ? `<a href="${p.github}" class="proj-link" target="_blank" rel="noopener">${ICONS.external} GitHub</a>` : ''}
-        ${p.demo   ? `<a href="${p.demo}"   class="proj-link" target="_blank" rel="noopener">${ICONS.external} Demo</a>`   : ''}
-      </div>
-    </div>`).join('');
+  const projs = getProjetos();
+  document.getElementById('projects-grid').innerHTML = projs.length === 0
+    ? `<p style="color:var(--slate);padding:2rem 0;font-size:14px">Nenhum projeto cadastrado ainda.</p>`
+    : projs.map((p, i) => `
+      <div class="project-row">
+        <div class="proj-index">0${i+1}</div>
+        <div>
+          <div class="proj-tag">${p.tag}</div>
+          <div class="proj-title">${p.title}</div>
+          <div class="proj-desc">${p.desc}</div>
+          <div class="proj-techs">${(p.techs||[]).map(t=>`<span class="proj-tech">${t}</span>`).join('')}</div>
+        </div>
+        <div class="proj-links">
+          ${p.github ? `<a href="${p.github}" class="proj-link" target="_blank" rel="noopener">${ICONS.external} GitHub</a>` : ''}
+          ${p.demo   ? `<a href="${p.demo}"   class="proj-link" target="_blank" rel="noopener">${ICONS.external} Demo</a>`   : ''}
+        </div>
+      </div>`).join('');
 }
 
 /* ============================================
@@ -305,7 +321,6 @@ function navigate(section) {
 document.addEventListener('DOMContentLoaded', () => {
   document.title = CONFIG.nome + ' — Economista Quantitativo';
 
-  // nav
   document.querySelectorAll('.nav-links a[data-section]').forEach(link => {
     link.addEventListener('click', e => { e.preventDefault(); navigate(link.dataset.section); });
   });
@@ -314,7 +329,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (s) { e.preventDefault(); navigate(s.dataset.goto); }
   });
 
-  // filtros artigos
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -323,7 +337,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // mobile toggle
   const toggle   = document.getElementById('nav-toggle');
   const navLinks = document.getElementById('nav-links');
   toggle.innerHTML = ICONS.menu;
@@ -332,14 +345,10 @@ document.addEventListener('DOMContentLoaded', () => {
     toggle.innerHTML = open ? ICONS.close : ICONS.menu;
   });
 
-  // hero social
   document.getElementById('nav-linkedin').href = CONFIG.redes.linkedin;
   document.getElementById('nav-github').href   = CONFIG.redes.github;
-
-  // footer
   document.getElementById('footer-year').textContent = '© ' + new Date().getFullYear();
 
-  // render
   renderHome();
   renderSobre();
   renderContato();
